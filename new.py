@@ -39,7 +39,7 @@ if results:
         min_y = min(min_y, y1)
         max_x = max(max_x, x2)
         max_y = max(max_y, y2)
-    print(max_x, max_y)
+
 
     y_plot1 = np.arange(y3, y4, 0.1)
     x_plot1 = x3
@@ -55,7 +55,7 @@ if results:
         cv2.circle(image, (int(x_val2), int(y4)), 1, (0, 0, 255), -1)
         
     plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    plt.axis('off')
+    plt.axis('on')
     plt.show()
 
 else:
