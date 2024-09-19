@@ -28,7 +28,7 @@ if results:
         if idx == 0:
             x3, y3 = x1, y1
             first_y1 = y1
-        y4 = max(y4, y2)
+        y4 = max(y4, y2)t
         x4 = max(x4, x2)
 
         color = (0, 255, 0)
