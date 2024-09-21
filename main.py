@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 reader = easyocr.Reader(['en'])
 
-image_path = r'C:\Users\Shrey Parekh\Documents\Margin-Detection\images\Image_7.jpg'
+image_path = r'C:\Users\Shrey Parekh\Documents\Margin-Detection\images\Image_29.jpg'
 image = cv2.imread(image_path)
 
 if image is None:
@@ -74,14 +74,9 @@ if results:
     y_plot2 = y3
     for x_val in x_plot2:
         cv2.circle(image, (int(x_val), int(y_plot2)), 2, (0, 0, 255), -1)
-    
-    for x_val2 in x_plot2:
-        cv2.circle(image, (int(x_val2), int(y4)), 2, (0, 0, 255), -1)
-        
-    for x_val3 in x_plot2:
-        cv2.circle(image, (int(x_val3), int(n1_list)), 2, (209, 26, 255), -1)
-    for x_val4 in x_plot2:
-        cv2.circle(image, (int(x_val4), int(n2_list)), 2, (209, 26, 255), -1)
+        cv2.circle(image, (int(x_val), int(y4)), 2, (0, 0, 255), -1)
+        cv2.circle(image, (int(x_val), int(n1_list)), 2, (209, 26, 255), -1)
+        cv2.circle(image, (int(x_val), int(n2_list)), 2, (209, 26, 255), -1)
         
     for y_val2 in y_plot1:
         cv2.circle(image, (int(x4), int(y_val2)), 2, (0, 0, 255), -1)
