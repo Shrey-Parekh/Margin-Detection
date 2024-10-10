@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 reader = easyocr.Reader(['en'])
 
-image_path = r'C:\Users\Shrey Parekh\Documents\Margin-Detection\images\Image_30.jpg'
+image_path = r'C:\Users\Shrey Parekh\Documents\Margin-Detection\images\Image_17.jpg'
 image = cv2.imread(image_path)
 
 if image is None:
@@ -20,8 +20,6 @@ max_x, max_y = 0, 0
 x3, y3 = None, None
 y4 = x4 = 0
 first_y1 = None
-
-first_word_midpoint = []
 x_diff = []
 
 blue_bbox_midpoints = []
@@ -42,7 +40,7 @@ if results:
             color = (255, 0, 0)
             blue_bbox_midpoints.append([x1, y_midpoint])
         else:
-            color = (0, 0, 255)
+            color =  (255,255, 255)
 
         cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
 
@@ -78,8 +76,6 @@ if results:
     mid = []
     bottom = []
 
-    print(f"Blue bbox midpoints: {blue_bbox_midpoints}")
-    print(f"n2_list: {n2_list}")
 
     for x, y in blue_bbox_midpoints[1:]:
         if y <= n1_list:
