@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 reader = easyocr.Reader(['en'])
 
-image_path = r'C:\Users\Shrey Parekh\Documents\Margin-Detection\images\Image_17.jpg'
+image_path = r'C:\Users\Shrey Parekh\Documents\Margin-Detection\images\Image_19.jpg'
 image = cv2.imread(image_path)
 
 if image is None:
@@ -23,6 +23,7 @@ first_y1 = None
 x_diff = []
 
 blue_bbox_midpoints = []
+green_bbox_midpoints = []
 
 if results:
     last_y1 = None
@@ -30,6 +31,7 @@ if results:
         x1, y1 = bbox[0]
         x2, y2 = bbox[2]
         y_midpoint = (y1 + y2) / 2
+        x_midpoint = (x1 + x2) / 2
         if id == 0:
             x3, y3 = x1, y1
             first_y1 = y1
@@ -37,10 +39,13 @@ if results:
         x4 = max(x4, x2)
 
         if (x3 - 250) <= x1 <= (x3 + 76):
-            color = (255, 0, 0)
+            color = (255, 0, 0)  # Blue for left margin
             blue_bbox_midpoints.append([x1, y_midpoint])
+        elif (y3 - 250) <= y1 <= (y3 + 35):
+            color = (0, 255, 0)
+            green_bbox_midpoints.append([x_midpoint, y1])
         else:
-            color =  (255,255, 255)
+            color = (255, 255, 255)
 
         cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
 
@@ -75,7 +80,25 @@ if results:
     top = []
     mid = []
     bottom = []
+    
+    filter_y = []
+    print(green_bbox_midpoints, "\n")
+    for x, y in green_bbox_midpoints[0:]:
+        filter_y.append(y)
+        
+    print(filter_y, "\n")
+    
+    # Z-score-based outlier removal function
+    def remove_outliers_z_score(data, threshold=3):
+        if not data:
+            return [80]
+        mean = np.mean(data)
+        std_dev = np.std(data)
+        filtered_data = [x for x in data if abs((x - mean) / std_dev) <= threshold]
+        return filtered_data if filtered_data else [80]
 
+    filtered_y_z = remove_outliers_z_score(filter_y)
+    print("\nFiltered Data using Z-score:\n", filtered_y_z)
 
     for x, y in blue_bbox_midpoints[1:]:
         if y <= n1_list:
@@ -100,11 +123,6 @@ if results:
     for x in bottom:
         bottom_diff.append(x[0] - x_plot1)
 
-    print("\nUn-filtered Data:\n")
-    print("top:\t", top_diff)
-    print("mid:\t", mid_diff)
-    print("bottom:\t", bottom_diff)
-
     def remove_outliers(data):
         if not data:
             return [80]
@@ -117,25 +135,14 @@ if results:
     filtered_top = remove_outliers(top_diff)
     filtered_mid = remove_outliers(mid_diff)
     filtered_bottom = remove_outliers(bottom_diff)
-
-    print("\nFiltered Data:\n")
-    print(filtered_top)
-    print(filtered_mid)
-    print(filtered_bottom)
-
+    filtered_y_z = remove_outliers_z_score(filter_y)
+    print("\nFiltered Data using Z-score:\n", filtered_y_z)
     def list_avg(lst):
         return 80 if not lst else sum(lst) / len(lst)
 
-    top_avg = list_avg(filtered_top)
-    mid_avg = list_avg(filtered_mid)
-    bottom_avg = list_avg(filtered_bottom)
-
-    print("\nAverage of list: \n")
-    print(top_avg, "\t", mid_avg, "\t", bottom_avg, "\n")
-
     fig, ax1 = plt.subplots(1, 1, figsize=(12, 6))
     ax1.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    ax1.axis('on')
+    ax1.axis('off')
 
     plt.tight_layout()
     plt.show()
