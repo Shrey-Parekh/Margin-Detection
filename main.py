@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 reader = easyocr.Reader(['en'])
 
-image_path = r'D:\Margin-Detection\images\Image_4.jpg'
+image_path = r'D:\Margin-Detection\images\Image_14.jpg'
 image = cv2.imread(image_path)
 
 if image is None:
@@ -24,9 +24,7 @@ x_diff = []
 
 left_margin_bbox = []
 top_margin_bbox = []
-
-# Added right margin tracking
-right_margin_bbox = []
+bottom_margin_bbox = []  # To store bottom margin bounding boxes closest to the line
 
 if results:
     last_y1 = None
@@ -38,17 +36,16 @@ if results:
         if id == 0:
             x3, y3 = x1, y1
             first_y1 = y1
-        y4 = max(y4, y2)
-        x4 = max(x4, x2)
+        y4 = max(y4, y2) 
+        x4 = max(x4, x2)  
+        
         # Left margin detection
         if (x3 - 250) <= x1 <= (x3 + 76):
             color = (255, 0, 0)  
             left_margin_bbox.append([x1, y_midpoint])
         elif (y3 - 250) <= y1 <= (y3 + 35):
-            color = (0, 0, 0) #top margin
+            color = (0, 0, 0)  # top margin
             top_margin_bbox.append([x2, y1])
-        
-
         else:
             continue
 
@@ -95,7 +92,8 @@ if results:
 
     for y_val2 in y_plot1: 
         cv2.circle(image, (int(n3_verticle), int(y_val2)), 2, (255,0,100), -1)
-#Left Margin Filtering
+        
+    # Left Margin Filtering
     top = []
     mid = []
     bottom = []
@@ -142,44 +140,92 @@ if results:
         return 80 if not lst else sum(lst) / len(lst)
 
 
-#Top Margin Filtering
-    left = []
-    right = []
+    # Top Margin Filtering
+    top_left = []
+    top_right = []
     
     for x,y in top_margin_bbox[:]:
         if x <=n3_verticle:
-            left.append([x,y])
+            top_left.append([x,y])
         elif x> n3_verticle: 
-            right.append([x,y])
+            top_right.append([x,y])
         else:
             print(f"No bbox for bottom region at y={y}")
             pass
-    left_diff =[]
-    right_diff = []
+    top_left_diff =[]
+    top_right_diff = []
     
-    for x in left:
-        left_diff.append(x[1] - y_plot2)
-    for x in right: 
-        right_diff.append(x[1] - y_plot2)
+    for x in top_left:
+        top_left_diff.append(x[1] - y_plot2)
+    for x in top_right: 
+        top_right_diff.append(x[1] - y_plot2)
         
-    print(left_diff)
-    print(right_diff, "\n")
+    print(top_left_diff)
+    print(top_right_diff, "\n")
     
-    left_filtered = remove_outliers(left_diff)
-    right_filtered = remove_outliers(right_diff)
+    top_left_filtered = remove_outliers(top_left_diff)
+    top_right_filtered = remove_outliers(top_right_diff)
 
-    print(left_filtered)
-    print(right_filtered)
+    print(top_left_filtered)
+    print(top_right_filtered)
+
+    threshold = 33 
+    for bbox, text, prob in results:
+        x1, y1 = bbox[0]
+        x2, y2 = bbox[2]
+        if abs(y2 - y4) <= threshold:
+            color = (0, 255, 255)  
+            bottom_margin_bbox.append(bbox)
+        else:
+            continue 
+        cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
+
+# Bottom Margin Filtering
+    bottom_left = []
+    bottom_right = []
+
+    def bottom_remove_outliers(data):
+        if not data:
+            return []
+        median = statistics.median(data)
+        mad = statistics.median([abs(x - median) for x in data])
+        threshold = 2.7 * mad
+        filtered_data = [x for x in data if abs(x - median) <= threshold]
+        return filtered_data if filtered_data else []
+
+    for bbox in bottom_margin_bbox[:]:
+        x2, y2 = bbox[2]
+        if x2 <=n3_verticle:
+            bottom_left.append([x2,y2])
+        elif x2> n3_verticle: 
+            bottom_right.append([x2,y2])
+        else:
+            print(f"No bbox for bottom region at y={y}")
+            pass
+    bottom_left_diff =[]
+    bottom_right_diff = []
+
+    for x in bottom_left:
+        bottom_left_diff.append(x[1] - y4)
+    for x in bottom_right: 
+        bottom_right_diff.append(x[1] - y4)
+        
+    print("Bottom Diff")
+    print(bottom_left_diff)
+    print(bottom_right_diff, "\n")
     
+    bottom_left_filtered = bottom_remove_outliers(bottom_left_diff)
+    bottom_right_filtered = bottom_remove_outliers(bottom_right_diff)
+
+    print("Bottom Diff Filtered")
+    print(bottom_left_filtered)
+    print(bottom_right_filtered)
     
-#OpencV
     fig, ax1 = plt.subplots(1, 1, figsize=(12, 6))
     ax1.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     ax1.axis('off')
-
     plt.tight_layout()
     plt.show()
 
 else:
     print("No text detected in the image.")
-    pass
