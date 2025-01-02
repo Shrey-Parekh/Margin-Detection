@@ -6,11 +6,7 @@ import matplotlib.pyplot as plt
 
 reader = easyocr.Reader(['en'])
 
-<<<<<<< HEAD
-image_path = r'D:\Margin-Detection\images\Image_14.jpg'
-=======
-image_path = r'Margin-Detection\images\Image_29.jpg'
->>>>>>> 5bf2d9b0343671531a5cc578de7fb502b17e9a91
+image_path = r'D:\Margin-Detection\images\Image_4.jpg'
 image = cv2.imread(image_path)
 
 if image is None:
@@ -40,13 +36,8 @@ if results:
         if id == 0:
             x3, y3 = x1, y1
             first_y1 = y1
-<<<<<<< HEAD
         y4 = max(y4, y2) 
         x4 = max(x4, x2)  
-=======
-        y4 = max(y4, y2)  # Keep updating y4 to get the maximum y2 (bottom-most position)
-        x4 = max(x4, x2)  # Keep updating x4 to get the rightmost x2
->>>>>>> 5bf2d9b0343671531a5cc578de7fb502b17e9a91
         
         # Left margin detection
         if (x3 - 250) <= x1 <= (x3 + 76):
@@ -102,7 +93,7 @@ if results:
     for y_val2 in y_plot1: 
         cv2.circle(image, (int(n3_verticle), int(y_val2)), 2, (255,0,100), -1)
         
-    # Left Margin Filtering
+# Left Margin Filtering
     top = []
     mid = []
     bottom = []
@@ -144,12 +135,19 @@ if results:
     filtered_mid = remove_outliers(mid_diff)
     filtered_bottom = remove_outliers(bottom_diff)
 
-    
+    print("Left Margin:\nUnfiltered:")
+    print("\nTop: ",top_diff)
+    print("\nMid: ",mid_diff)
+    print("\nBottom: ",bottom_diff)
+    print("\nFiltered Data: \n")
+    print("Top: ",filtered_top)
+    print("\nMid: ",filtered_mid)
+    print("\nBottom: ",filtered_bottom)
     def list_avg(lst):
         return 80 if not lst else sum(lst) / len(lst)
 
 
-    # Top Margin Filtering
+# Top Margin Filtering
     top_left = []
     top_right = []
     
@@ -169,15 +167,9 @@ if results:
     for x in top_right: 
         top_right_diff.append(x[1] - y_plot2)
         
-    print(top_left_diff)
-    print(top_right_diff, "\n")
     
     top_left_filtered = remove_outliers(top_left_diff)
     top_right_filtered = remove_outliers(top_right_diff)
-
-    print(top_left_filtered)
-    print(top_right_filtered)
-<<<<<<< HEAD
 
     threshold = 33 
     for bbox, text, prob in results:
@@ -189,6 +181,12 @@ if results:
         else:
             continue 
         cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
+    print("\nTop Margins:\nUnfiltered: \n")
+    print("Left: ",top_left_diff)
+    print("\n Right: ",top_right_diff)
+    print("\nFiltered: \n")
+    print("Left: ",top_left_filtered)
+    print("\nRight: ",top_right_filtered)
 
 # Bottom Margin Filtering
     bottom_left = []
@@ -220,89 +218,29 @@ if results:
     for x in bottom_right: 
         bottom_right_diff.append(x[1] - y4)
         
-    print("Bottom Diff")
-    print(bottom_left_diff)
-    print(bottom_right_diff, "\n")
-    
+
     bottom_left_filtered = bottom_remove_outliers(bottom_left_diff)
     bottom_right_filtered = bottom_remove_outliers(bottom_right_diff)
 
-    print("Bottom Diff Filtered")
-    print(bottom_left_filtered)
-    print(bottom_right_filtered)
+    print("\nBottom Margin:\nUnfiltered: \n")
+    print("Left: ",bottom_left_diff)
+    print("\nRight: ",bottom_right_diff)
+    print("\n Filtered: \n")
+    print("Left: \n",bottom_left_filtered)
+    print("\nRight: ",bottom_right_filtered)
+
     
-=======
-    
-    # Bottom Margin Detection (Highlight Closest Bboxes in Yellow)
-    threshold = 30  # Define a threshold for closeness to the bottom line (adjustable)
-
-    for bbox, text, prob in results:
-        x1, y1 = bbox[0]
-        x2, y2 = bbox[2]
-
-        # Check if y2 is within threshold distance from y4
-        if abs(y2 - y4) <= threshold:
-            # Highlight close bbox in yellow and add to bottom_margin_bbox list
-            color = (0, 255, 255)  # Yellow
-            bottom_margin_bbox.append(bbox)
-        else:
-            continue  # Skip if not close enough to the bottom line
-
-        # Draw the rectangle around the detected bbox
-        cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
-
-    # Bottom Margin Filtering
-    bottom_left = []
-    bottom_right = []
-
-    def bottom_remove_outliers(data):
-        if not data:
-            return []
-        median = statistics.median(data)
-        mad = statistics.median([abs(x - median) for x in data])
-        threshold = 3 * mad
-        filtered_data = [x for x in data if abs(x - median) <= threshold]
-        return filtered_data if filtered_data else []
-
-    for bbox in bottom_margin_bbox[:]:
-        x2, y2 = bbox[2]
-        if x2 <=n3_verticle:
-            bottom_left.append([x2,y2])
-        elif x2> n3_verticle: 
-            bottom_right.append([x2,y2])
-        else:
-            print(f"No bbox for bottom region at y={y}")
-            pass
-    bottom_left_diff =[]
-    bottom_right_diff = []
-
-    for x in bottom_left:
-        bottom_left_diff.append(x[1] - y4)
-    for x in bottom_right: 
-        bottom_right_diff.append(x[1] - y4)
-        
-    print("Bottom Diff")
-    print(bottom_left_diff)
-    print(bottom_right_diff, "\n")
-    
-    bottom_left_filtered = bottom_remove_outliers(bottom_left_diff)
-    bottom_right_filtered = bottom_remove_outliers(bottom_right_diff)
-
-    print("Bottom Diff Filtered")
-    print(bottom_left_filtered)
-    print(bottom_right_filtered)
-    
-
-    # OpenCV Display with Yellow Highlighted Bottom Margin
->>>>>>> 5bf2d9b0343671531a5cc578de7fb502b17e9a91
     fig, ax1 = plt.subplots(1, 1, figsize=(12, 6))
     ax1.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     ax1.axis('off')
     plt.tight_layout()
     plt.show()
 
-    # Print bottom margin bounding boxes for reference
-    print("Bottom Margin Bounding Boxes (closest to line):", bottom_margin_bbox)
-
+   
 else:
     print("No text detected in the image.")
+    
+    
+    
+    
+    
