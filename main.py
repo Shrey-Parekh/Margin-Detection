@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 reader = easyocr.Reader(['en'])
 
-image_path = r'D:\Margin-Detection\images\Image_30.jpg'
+image_path = r'D:\Margin-Detection\new images\Image_117.jpg'
 image = cv2.imread(image_path)
 
 if image is None:
@@ -24,7 +24,7 @@ x_diff = []
 
 left_margin_bbox = []
 top_margin_bbox = []
-bottom_margin_bbox = []  # To store bottom margin bounding boxes closest to the line
+bottom_margin_bbox = []  
 
 if results:
     last_y1 = None
@@ -40,7 +40,7 @@ if results:
         x4 = max(x4, x2)  
         
         # Left margin detection
-        if (x3 - 250) <= x1 <= (x3 + 76):
+        if (x3 - 250) <= x1 <= (x3 + 75):
             color = (255, 0, 0)  
             left_margin_bbox.append([x1, y_midpoint])
         elif (y3 - 250) <= y1 <= (y3 + 35):
@@ -114,22 +114,22 @@ if results:
     bottom_diff = []
 
     for x in top:
-        top_diff.append(x[0] - x_plot1)
+        top_diff.append(int(x[0] - x_plot1))
 
     for x in mid:
-        mid_diff.append(x[0] - x_plot1)
+        mid_diff.append(int(x[0] - x_plot1))
 
     for x in bottom:
-        bottom_diff.append(x[0] - x_plot1)
+        bottom_diff.append(int(x[0] - x_plot1))
 
     def remove_outliers(data):
         if not data:
-            return [80]
+            return [int(80)]
         median = statistics.median(data)
         mad = statistics.median([abs(x - median) for x in data])
-        threshold = 2.36 * mad
+        threshold = 2.35 * mad
         filtered_data = [x for x in data if abs(x - median) <= threshold]
-        return filtered_data if filtered_data else [80]    
+        return filtered_data if filtered_data else [int(80)]    
 
     filtered_top = remove_outliers(top_diff)
     filtered_mid = remove_outliers(mid_diff)
@@ -144,7 +144,7 @@ if results:
     print("\nMid: ",filtered_mid)
     print("\nBottom: ",filtered_bottom)
     def list_avg(lst):
-        return 80 if not lst else sum(lst) / len(lst)
+        return int(80) if not lst else sum(lst) / len(lst)
 
 
 # Top Margin Filtering
@@ -163,9 +163,9 @@ if results:
     top_right_diff = []
     
     for x in top_left:
-        top_left_diff.append(x[1] - y_plot2)
+        top_left_diff.append(int(x[1] - y_plot2))
     for x in top_right: 
-        top_right_diff.append(x[1] - y_plot2)
+        top_right_diff.append(int(x[1] - y_plot2))
         
     
     top_left_filtered = remove_outliers(top_left_diff)
@@ -214,9 +214,9 @@ if results:
     bottom_right_diff = []
 
     for x in bottom_left:
-        bottom_left_diff.append(x[1] - y4)
+        bottom_left_diff.append(int(x[1] - y4))
     for x in bottom_right: 
-        bottom_right_diff.append(x[1] - y4)
+        bottom_right_diff.append(int(x[1] - y4))
         
 
     bottom_left_filtered = bottom_remove_outliers(bottom_left_diff)
