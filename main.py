@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 reader = easyocr.Reader(['en'])
 
-image_path = r'D:\Margin-Detection\new images\Image_117.jpg'
+image_path = r'D:\Margin-Detection\new images\Image_15.jpg'
 image = cv2.imread(image_path)
 
 if image is None:
@@ -43,7 +43,7 @@ if results:
         if (x3 - 250) <= x1 <= (x3 + 75):
             color = (255, 0, 0)  
             left_margin_bbox.append([x1, y_midpoint])
-        elif (y3 - 250) <= y1 <= (y3 + 35):
+        elif (y3 - 250) <= y1 <= (y3 + 55):
             color = (0, 0, 0)  # top margin
             top_margin_bbox.append([x2, y1])
         else:
