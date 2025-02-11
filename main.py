@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 reader = easyocr.Reader(['en'])
 
-image_path = r'D:\Margin Detection\Margin-Detection\new images\Image_4.jpg'
+image_path = r'D:\Margin-Detection\images\Image_93.jpg'
 image = cv2.imread(image_path)
 
 if image is None:

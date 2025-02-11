@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 
 # Step 1: Load the image
-image_path = r'D:\Margin Detection\Margin-Detection\new images\Image_4.jpg'
+image_path = r'D:\Margin-Detection\images\Image_93.jpg'
 image = cv2.imread(image_path)
 if image is None:
     raise ValueError(f"Image not found at the path: {image_path}")
@@ -80,12 +80,3 @@ def draw_fitted_line(model, x_coords, color):
     for x, y in zip(x_range, y_range):
         cv2.circle(image, (int(x), int(y)), 2, color, 2)
 
-# Display Results
-# plt.figure(figsize=(12, 8))
-# plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-# plt.title("Top Line and Bottom Line")
-# plt.axis("off")
-# plt.show()
-
-print(f"Top Line Gradient: {top_line_gradient}")
-print(f"Bottom Line Gradient: {bottom_line_gradient}")

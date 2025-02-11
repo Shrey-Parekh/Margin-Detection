@@ -6,6 +6,7 @@ import statistics as st
 import matplotlib.pyplot as plt
 from main import *
 from top_bottom import *
+import os
 
 # Initialize variables
 slm = False
@@ -43,12 +44,6 @@ while True:
         wlm = True
         break
 
-# Display intermediate values
-print(filtered_top)
-print(filtered_mid)
-print(filtered_bottom)
-print(f"SLM: {slm}\nWLM: {wlm}\nDAFLM: {daflm}\nRFLM: {rlm}\nCCLM: {cclm}\nCVLM: {cvlm}")
-
 # Initialize top and bottom margin variables
 tns, tps, tls = False, False, False  # Top margin
 bns, bps, bls = False, False, False  # Bottom margin
@@ -79,9 +74,6 @@ while True:
         bs = True
         break
 
-# Display margin evaluation
-print(f"\nTT: {tt}\nTS: {ts}\ntda: {tda}\nBT: {bt}\nBS: {bs}\nBDA: {bda}")
-
 # Save results to CSV
 csv_headers = ["SLM", "WLM", "DAFLM", "RFLM", "CCLM", "CVLM", 
                "TT", "TS", "TDA", "BT", "BS", "BDA"]
@@ -89,11 +81,13 @@ csv_values = [int(slm), int(wlm), int(daflm), int(rlm), int(cclm), int(cvlm),
               int(tt), int(ts), int(tda), int(bt), int(bs), int(bda)]
 
 csv_filename = "Auto_margins.csv"
+file_exists = os.path.isfile(csv_filename)
 
-# Write to the CSV file
-with open(csv_filename, mode="w", newline="") as file:
-    writer = csv.writer(file)
-    writer.writerow(csv_headers)
+# Write to the CSV file without extra blank lines
+with open(csv_filename, mode="a", newline='') as file:
+    writer = csv.writer(file, lineterminator='\n')
+    if not file_exists:
+        writer.writerow(csv_headers)
     writer.writerow(csv_values)
 
-print(f"\nResults saved to {csv_filename}")
+print(f"\nResults appended to {csv_filename}")
