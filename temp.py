@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 reader = easyocr.Reader(['en'])
 
-image_path = r'C:\Users\Shrey\Documents\Margin-Detection\images\Image_79.jpg'
+image_path = r'images\Image_79.jpg'
 image = cv2.imread(image_path)
 
 if image is None:
@@ -86,13 +86,17 @@ if results:
     n3_verticle = x_plot2[n3]
 
 
-    for y_val2 in y_plot1: 
-        cv2.circle(image, (int(n3_verticle), int(y_val2)), 2, (255,0,100), -1)
+    # for y_val2 in y_plot1: 
+    #     cv2.circle(image, (int(n3_verticle), int(y_val2)), 2, (255,0,100), -1)
         
 # Left Margin Filtering
     top = []
     mid = []
     bottom = []
+    
+    #margin seperation lines
+    cv2.line(image, (0, int(n1_horizontal)), (width, int(n1_horizontal)), (0, 0, 0), 2)
+    cv2.line(image, (0, int(n2_horizontal)), (width, int(n2_horizontal)), (0, 0, 0), 2)
 
     for x, y in left_margin_bbox[1:]:
         if y <= n1_horizontal:
@@ -151,3 +155,8 @@ if results:
    
 else:
     print("No text detected in the image.")
+    
+    
+    
+    
+    
