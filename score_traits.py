@@ -1,13 +1,19 @@
 """Rule-based trait scoring from margin flags.
 
 Each margin the detector sets contributes its per-trait weight from
-margin_trait_weights.csv; the trait is called positive when the weights sum
-above that trait's threshold in margin_trait_thresholds.csv.
+margin_trait_weights.csv. The trait is called positive when the summed weight
+falls on the positive side of that trait's fitted threshold.
 
-The weights are graphological priors, not fitted values. Only the seven
-thresholds are learned, which is what keeps this usable at n=29 -- fitting the
-weights themselves overfits well before it helps (leave-one-out: hand weights
-73.4%, logistic regression on the same inputs 62.6%).
+The weights are graphological priors and are not estimated from data. Only the
+threshold and its direction are fitted, two parameters per trait, which is what
+keeps this usable at n = 29 -- fitting the weights themselves overfits well
+before it helps. The direction matters because a prior can be inverted relative
+to the data: without it, a trait whose score runs the wrong way is predicted
+backwards on every sample rather than merely being uninformative.
+
+The top and bottom margin classes describe distance from the page edge, so they
+can only be set from annotations of uncropped pages. Detectors run on
+text-cropped scans leave them at zero, which this module treats as undetermined.
 
 Run this module directly to refit the thresholds.
 """
@@ -32,18 +38,17 @@ def load_weights(path=WEIGHTS_CSV):
 
 
 def load_thresholds(path=THRESHOLDS_CSV):
-    """Fitted per-trait thresholds, or all-zero if none have been fitted yet."""
+    """Fitted thresholds and directions, or a zero threshold if none are fitted."""
     if not os.path.exists(path):
-        return pd.Series(0.0, index=TRAITS)
-    return pd.read_csv(path, index_col="trait")["threshold"].reindex(TRAITS)
+        return pd.DataFrame({"threshold": 0.0, "direction": 1}, index=TRAITS)
+    return pd.read_csv(path, index_col="trait").reindex(TRAITS)
 
 
 def score(features, weights=None):
     """Summed trait weights for a frame of 0/1 margin flags.
 
-    Uses the margin columns common to both inputs, so the 12-column
-    (features_auto_81) and 18-column (batch_extract_all) feature sets both work
-    without a separate code path.
+    Uses the margin columns common to both inputs, so a feature set missing the
+    top and bottom classes scores on the remaining ones without a separate path.
     """
     if weights is None:
         weights = load_weights()
@@ -51,35 +56,43 @@ def score(features, weights=None):
     return features[cols].dot(weights.loc[cols])
 
 
-def fit_thresholds(features, labels, weights=None):
-    """Per-trait threshold that best reproduces `labels`.
+def fit_thresholds(features, labels, weights=None, signed=False):
+    """Per-trait threshold and direction that best reproduce `labels`.
 
-    `labels` columns must be in TRAITS order; the label CSV uses its own
+    `labels` columns must be in TRAITS order; the label file uses its own
     spellings, so it is matched by position rather than by name.
     """
     s = score(features, weights)
-    best = [max(THRESHOLD_GRID,
-                key=lambda t: ((s.iloc[:, i] > t) == labels.iloc[:, i]).mean())
-            for i in range(len(TRAITS))]
-    return pd.Series(best, index=TRAITS)
+    out = []
+    for i in range(len(TRAITS)):
+        col, y = s.iloc[:, i].values, labels.iloc[:, i].values
+        best = max(((((col > t) if d == 1 else (col < t)) == y).mean(), t, d)
+                   for d in ((1, -1) if signed else (1,)) for t in THRESHOLD_GRID)
+        out.append({"threshold": best[1], "direction": best[2]})
+    return pd.DataFrame(out, index=TRAITS)
 
 
 def predict(features, weights=None, thresholds=None):
-    """Binary trait predictions: score above the trait's threshold -> 1."""
+    """Binary trait predictions from the fitted threshold and direction."""
     if thresholds is None:
         thresholds = load_thresholds()
-    return score(features, weights).gt(thresholds, axis=1).astype(int)
+    s = score(features, weights)
+    out = {}
+    for t in TRAITS:
+        th, d = thresholds.loc[t, "threshold"], thresholds.loc[t, "direction"]
+        out[t] = ((s[t] > th) if d == 1 else (s[t] < th)).astype(int)
+    return pd.DataFrame(out, index=s.index)
 
 
 if __name__ == "__main__":
-    # Fitted on the expert margin calls, which are the inputs the weights were
-    # written against. The detector's own margins do not yet reproduce them.
+    # Fitted on the expert margin annotations, which are the inputs the weights
+    # were written against and the only source of top and bottom margin classes.
     margins = pd.read_csv(os.path.join(HERE, "features_manual_29.csv"))
     margins.columns = [c.upper() for c in margins.columns]
     margins = margins.rename(columns={"RLM": "RFLM"})
     labels = pd.read_csv(os.path.join(HERE, "labels_traits_29.csv"))
 
     th = fit_thresholds(margins, labels)
-    th.rename_axis("trait").rename("threshold").to_csv(THRESHOLDS_CSV)
+    th.rename_axis("trait").to_csv(THRESHOLDS_CSV)
     print(f"fitted thresholds -> {os.path.basename(THRESHOLDS_CSV)}")
     print(th.to_string())
