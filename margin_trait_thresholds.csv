@@ -1,0 +1,8 @@
+trait,threshold,direction
+visionary,-0.5,1
+depressive,-0.5,1
+anxiety,-2.5,1
+respect_for_others,0.5,1
+procrastination,-1.5,1
+discipline,1.5,1
+truthfulness,1.5,1

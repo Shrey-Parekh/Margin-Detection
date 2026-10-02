@@ -1,0 +1,19 @@
+margin_code,margin_name,visionary,depressive,anxiety,respect_for_others,procrastination,discipline,truthfulness
+SLM,Straight left margin,0,0,0,1,-2,2,2
+WLM,Wavy left margin,0,0,1,-1,1,-2,-1
+DAFLM,Drifting away from left margin,1,0,0,-1,1,-1,-1
+RFLM,Reducing left margin,-1,1,1,0,-1,1,0
+CCLM,Concave left margin (widest at mid-page),0,0,1,0,0,0,-1
+CVLM,Convex left margin (narrowest at mid-page),0,0,0,0,1,-1,-1
+SRM,Straight right margin,0,0,0,2,-2,2,1
+WRM,Wavy right margin,0,0,1,-1,1,-2,-1
+DAFRM,Drifting away from right margin,1,0,0,-1,1,-1,-1
+RRM,Reducing right margin,-1,1,2,1,-1,1,0
+CCRM,Concave right margin (widest at mid-page),0,0,1,0,0,0,-1
+CVRM,Convex right margin (narrowest at mid-page),0,0,0,0,1,-1,-1
+TT,Descending first line,-1,1,1,0,1,-1,0
+TS,Level first line,0,-1,-1,1,-1,2,1
+TDA,Ascending first line,2,-2,0,0,-1,0,0
+BT,Descending last line,-1,2,1,0,2,-2,0
+BS,Level last line,0,-1,-1,1,-2,2,1
+BDA,Ascending last line,2,-2,0,0,-1,1,0

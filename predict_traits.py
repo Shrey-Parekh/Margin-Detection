@@ -1,13 +1,19 @@
+import os
+
+import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
 
+from score_traits import predict as rule_predict
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+
 # Load data
-margin_features = pd.read_csv(r'C:\Users\Shrey\Documents\Margin-Detection\features_auto_81.csv').iloc[:29]
-personality_traits = pd.read_csv(r'C:\Users\Shrey\Documents\Margin-Detection\labels_traits_29.csv')
+margin_features = pd.read_csv(os.path.join(HERE, 'features_auto_81.csv')).iloc[:29]
+personality_traits = pd.read_csv(os.path.join(HERE, 'labels_traits_29.csv'))
 
 # Reset index
 margin_features.reset_index(drop=True, inplace=True)
@@ -26,6 +32,9 @@ multi_output_model.fit(X_train, y_train)
 # Predictions on test data
 y_pred = multi_output_model.predict(X_test)
 
+# Rule-based predictions from the margin/trait weight matrix.
+rule_pred = rule_predict(X_test)
+
 # Metrics calculation
 metrics = {
     'Trait': [],
@@ -33,7 +42,8 @@ metrics = {
     'Precision': [],
     'Recall': [],
     'F1-score': [],
-    'Support': []
+    'Support': [],
+    'Rule Accuracy': []
 }
 
 for i, column in enumerate(y_test.columns):
@@ -49,6 +59,8 @@ for i, column in enumerate(y_test.columns):
     metrics['Recall'].append(recall)
     metrics['F1-score'].append(f1)
     metrics['Support'].append(support)
+    # Label columns are in score_traits.TRAITS order, so match by position.
+    metrics['Rule Accuracy'].append(accuracy_score(y_test.iloc[:, i], rule_pred.iloc[:, i]))
 
 metrics_df = pd.DataFrame(metrics)
 
@@ -57,17 +69,42 @@ overall_accuracy = accuracy_score(y_test, y_pred)
 print("\n\n", metrics_df)
 print(f"\nOverall Accuracy: {overall_accuracy:.4f}")
 
+
+def rule_accuracy(margins, labels):
+    """Mean per-trait accuracy of the weight matrix, against the base rate."""
+    pred = rule_predict(margins)
+    acc = [(pred.iloc[:, i].values == labels.iloc[:, i].values).mean()
+           for i in range(labels.shape[1])]
+    base = [max(labels.iloc[:, i].mean(), 1 - labels.iloc[:, i].mean())
+            for i in range(labels.shape[1])]
+    return np.mean(acc), np.mean(base)
+
+
+# Scored over all 29 labelled papers rather than the 8-row test split, which is
+# too small to separate anything. Expert margins are the ceiling the weights can
+# reach; the detector's own margins are what the pipeline achieves today.
+expert_margins = pd.read_csv(os.path.join(HERE, 'features_manual_29.csv'))
+expert_margins.columns = [c.upper() for c in expert_margins.columns]
+expert_margins = expert_margins.rename(columns={'RLM': 'RFLM'})
+
+for name, margins in [('expert margins  ', expert_margins),
+                      ('detector margins', margin_features)]:
+    acc, base = rule_accuracy(margins, personality_traits)
+    print(f"weight matrix on {name}: {acc * 100:.1f}%   (base rate {base * 100:.1f}%)")
+
 # Function to predict personality traits based on new margin features
 def predict_personality(new_data):
+    """Returns (naive-Bayes predictions, weight-matrix predictions)."""
     if isinstance(new_data, dict):
         new_data = pd.DataFrame([new_data])  # Convert dict to DataFrame
     elif isinstance(new_data, list):
         new_data = pd.DataFrame(new_data, columns=margin_features.columns)  # Convert list to DataFrame
     
-    predictions = multi_output_model.predict(new_data)
-    prediction_df = pd.DataFrame(predictions, columns=personality_traits.columns)
-    
-    return prediction_df
+    nb_df = pd.DataFrame(multi_output_model.predict(new_data),
+                         columns=personality_traits.columns)
+    rule_df = rule_predict(new_data).set_axis(personality_traits.columns, axis=1)
+
+    return nb_df, rule_df
 
 # Example usage
 new_margin_data = {
@@ -86,5 +123,6 @@ new_margin_data = {
     'BDA':1
 }
 
-predicted_traits = predict_personality(new_margin_data)
-print("\nPredicted Personality Traits:\n", predicted_traits)
+nb_traits, rule_traits = predict_personality(new_margin_data)
+print("\nPredicted Personality Traits (naive Bayes):\n", nb_traits)
+print("\nPredicted Personality Traits (weight matrix):\n", rule_traits)
