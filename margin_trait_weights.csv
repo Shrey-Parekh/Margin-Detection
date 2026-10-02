@@ -1,16 +1,16 @@
 margin_code,margin_name,visionary,depressive,anxiety,respect_for_others,procrastination,discipline,truthfulness
 SLM,Straight left margin,0,0,0,1,-2,2,2
 WLM,Wavy left margin,0,0,1,-1,1,-2,-1
-DAFLM,Widening left margin,1,0,0,-1,1,-1,-1
-RFLM,Narrowing left margin,-1,1,1,0,-1,1,0
-CCLM,Left margin widest at mid-page (convex),0,0,0,0,1,-1,-1
-CVLM,Left margin narrowest at mid-page (concave),0,0,1,0,0,0,-1
+DAFLM,Drifting away from left margin,1,0,0,-1,1,-1,-1
+RFLM,Reducing left margin,-1,1,1,0,-1,1,0
+CCLM,Concave left margin (widest at mid-page),0,0,1,0,0,0,-1
+CVLM,Convex left margin (narrowest at mid-page),0,0,0,0,1,-1,-1
 SRM,Straight right margin,0,0,0,2,-2,2,1
 WRM,Wavy right margin,0,0,1,-1,1,-2,-1
-DAFRM,Widening right margin,1,0,0,-1,1,-1,-1
-RRM,Narrowing right margin,-1,1,2,1,-1,1,0
-CCRM,Right margin widest at mid-page (convex),0,0,0,0,1,-1,-1
-CVRM,Right margin narrowest at mid-page (concave),0,0,1,0,0,0,-1
+DAFRM,Drifting away from right margin,1,0,0,-1,1,-1,-1
+RRM,Reducing right margin,-1,1,2,1,-1,1,0
+CCRM,Concave right margin (widest at mid-page),0,0,1,0,0,0,-1
+CVRM,Convex right margin (narrowest at mid-page),0,0,0,0,1,-1,-1
 TT,Descending first line,-1,1,1,0,1,-1,0
 TS,Level first line,0,-1,-1,1,-1,2,1
 TDA,Ascending first line,2,-2,0,0,-1,0,0
